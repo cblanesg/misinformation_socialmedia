@@ -64,3 +64,18 @@ ggplot(gg_data3, aes(x = n_days_since_publication, y = value, colour = interacti
   labs(title = 'Change in growth of interactions since publication of post', 
        subtitle = 'Newspapers Data')
 
+
+
+counts <- clean_input_reg %>%
+  left_join(panel, by = 'id_post') %>%
+  group_by(id_desinformacion ) %>%
+  count() 
+
+length(counts$id_desinformacion)
+
+ggplot(counts, aes(x = n)) + 
+  geom_density() + 
+  labs(title = 'Number of posts by desinformation', 
+       subtitle = 'Max posts: 13,128\nMin posts: 5\nMean: 950\nMisinformations: 128')
+
+

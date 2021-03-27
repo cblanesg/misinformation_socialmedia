@@ -105,7 +105,7 @@ input_reg %>%
   group_by(label_desinformacion) %>%
   count()
 
-
+save(input_reg, file = '5-analysis/1-input_data/data_reg_social.Rda')
 
 stargazer::stargazer(lm(growth_likes~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment), 
            data = input_reg), 

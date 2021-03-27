@@ -67,8 +67,7 @@ for (i in 1: length(dep.var)){
                                # '+', 
                                # 'as.factor(label_desinformacion)', 
                                # '+', 
-                               'as.factor(label_desinformacion)*as.factor(treatment)'
-                               ,
+                               'as.factor(label_desinformacion)*as.factor(treatment)',
                                '+',
                                'id_post' ,
                                '+',
@@ -78,8 +77,6 @@ for (i in 1: length(dep.var)){
                           data =clean_input_reg)
   print(paste0('Finish: ', i))
 }
-
-
 
 stargazer::stargazer(reg_fe_label[1], 
                      reg_fe_label[2], 
@@ -105,11 +102,11 @@ for (i in 1: length(dep.var)){
                                '+', 
                                'as.factor(poynter_facebook)*as.factor(treatment)', 
                                '+', 
-                               'id_desinformacion', 
+                               'id_post', 
                                '+', 
                                'as.factor(n_days_since_factcheck)'))
   reg_fe[[i]] <- lm(formula, 
-                    data = subset(input_reg, label_desinformacion == 'fake'))
+                    data = subset(clean_input_reg, label_desinformacion == 'fake'))
 }
 
 
@@ -117,7 +114,7 @@ stargazer::stargazer(reg_fe[1],
                      reg_fe[2], 
                      reg_fe[3], 
                      reg_fe[4], 
-                     omit = 'id_desinformacion|n_days_since_factcheck',
+                     omit = 'id_post|n_days_since_factcheck',
                      #type = 'text', 
                      covariate.labels = c('treatment', 
                                           'poynter', 
