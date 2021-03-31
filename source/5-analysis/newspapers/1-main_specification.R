@@ -11,41 +11,46 @@ setwd(dir = '~/misinformation_socialmedia/data/')
 ### Load and prepare data
 load('5-analysis/1-input_data/data_reg_newspapers.Rda', verbose = TRUE)
 
-clean_input_reg <- input_reg %>%
-  mutate(growth_likes = ifelse(growth_likes == Inf, 0, growth_likes), 
-         growth_shares = ifelse(growth_shares == Inf, 0, growth_shares), 
-         growth_comments = ifelse(growth_comments == Inf, 0, growth_comments), 
-         growth_reactions = ifelse(growth_reactions == Inf, 0, growth_reactions))
-
-
 ## Run regressions
 stargazer::stargazer(lm(growth_likes~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment), 
-                        data = clean_input_reg), 
-                     lm(growth_shares~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment), 
-                        data = clean_input_reg), 
-                     lm(growth_comments~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment), 
-                        data = clean_input_reg), 
-                     lm(growth_reactions~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment), 
-                        data = clean_input_reg), 
-                     type = 'text',
+                        data = input_reg), 
+                     lm(growth_shares~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment),
+                        data = input_reg),
+                     lm(growth_comments~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment),
+                        data = input_reg),
+                     lm(growth_reactions~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment),
+                        data = input_reg),
+                     lm(growth_interactions~as.factor(treatment) + label_desinformacion + label_desinformacion*as.factor(treatment),
+                        data = input_reg),
+                     #type = 'text',
                      covariate.labels   = c('treatment',
                                             'fake label',
                                             'treatment:fake'),
                      omit.stat = c("ser", "rsq","f")
 )
 
+input_reg %>%
+  group_by(poynter) %>%
+  count()
 
-stargazer::stargazer(lm(growth_likes~as.factor(treatment) + as.factor(poynter_facebook) + as.factor(poynter_facebook)*as.factor(treatment), 
-                        data = subset(clean_input_reg, label_desinformacion == 'fake')), 
-                     lm(growth_shares~as.factor(treatment) + as.factor(poynter_facebook) + as.factor(poynter_facebook)*as.factor(treatment), 
-                        data = subset(clean_input_reg, label_desinformacion == 'fake')), 
-                     lm(growth_comments~as.factor(treatment) + as.factor(poynter_facebook) + as.factor(poynter_facebook)*as.factor(treatment), 
-                        data = subset(clean_input_reg, label_desinformacion == 'fake')), 
-                     lm(growth_reactions~as.factor(treatment) + as.factor(poynter_facebook) + as.factor(poynter_facebook)*as.factor(treatment), 
-                        data = subset(clean_input_reg, label_desinformacion == 'fake')), 
+stargazer::stargazer(lm(growth_likes~as.factor(treatment) + as.factor(poynter) + as.factor(poynter)*as.factor(treatment), 
+                        data = subset(input_reg, label_desinformacion == 'fake')), 
+                     lm(growth_shares~as.factor(treatment) + as.factor(poynter) + as.factor(poynter)*as.factor(treatment),
+                        data = subset(input_reg, label_desinformacion == 'fake')),
+                     lm(growth_comments~as.factor(treatment) + as.factor(poynter) + as.factor(poynter)*as.factor(treatment),
+                        data = subset(input_reg, label_desinformacion == 'fake')),
+                     lm(growth_reactions~as.factor(treatment) + as.factor(poynter) + as.factor(poynter)*as.factor(treatment),
+                        data = subset(input_reg, label_desinformacion == 'fake')),
+                     lm(growth_interactions~as.factor(treatment) + as.factor(poynter) + as.factor(poynter)*as.factor(treatment),
+                        data = subset(input_reg, label_desinformacion == 'fake')),
                      #type = 'text', 
+                     dep.var.labels = c('growth likes', 
+                                        'growth shares', 
+                                        'growth comments', 
+                                        'growth reactions', 
+                                        'growth interactions'),
                      covariate.labels   = c('treatment', 
-                                            'poynter facebook', 
+                                            'poynter', 
                                             'treatment:poynter'), 
                      
                      omit.stat = c("ser", "rsq","f"))
@@ -53,10 +58,12 @@ stargazer::stargazer(lm(growth_likes~as.factor(treatment) + as.factor(poynter_fa
 
 ##### With fixed effects
 
-dep.var <- c('growth_likes', 
-             'growth_shares', 
-             'growth_comments', 
-             'growth_reactions')
+dep.var <- c('growth_likes',
+             'growth_shares',
+             'growth_comments',
+             'growth_reactions',
+             'growth_interactions'
+             )
 
 reg_fe_label <- list()
 
@@ -69,27 +76,28 @@ for (i in 1: length(dep.var)){
                                # '+', 
                                'as.factor(label_desinformacion)*as.factor(treatment)',
                                '+',
-                               'id_post' ,
+                               'as.factor(id_desinformacion)' ,
                                '+',
-                               'as.factor(n_days_since_factcheck)'
+                               'as.factor(days_since_factcheck)'
                                ))
   reg_fe_label[[i]] <- lm(formula, 
-                          data =clean_input_reg)
+                          data =input_reg)
   print(paste0('Finish: ', i))
 }
 
 stargazer::stargazer(reg_fe_label[1], 
-                     reg_fe_label[2], 
-                     reg_fe_label[3], 
-                     reg_fe_label[4], 
-                     omit = 'id_post|n_days_since_factcheck',
+                     reg_fe_label[2],
+                     reg_fe_label[3],
+                     reg_fe_label[4],
+                     reg_fe_label[5],
+                     omit = 'id_desinformacion|days_since_factcheck',
                      #type = 'text', 
                      covariate.labels = c('treatment',
                                           'fake',
                                           'treatment:fake'),
                      omit.stat = c("ser", "rsq","f"), 
-                     add.lines = list(c('\\textbf{Post FE}', rep('Yes', 4)), 
-                                      c('\\textbf{Time FE}', rep('Yes', 4))))
+                     add.lines = list(c('\\textbf{Misinformation FE}', rep('Yes', 5)), 
+                                      c('\\textbf{Time FE}', rep('Yes', 5))))
 
 reg_fe <- list()
 
