@@ -68,7 +68,7 @@ subset5_input_reg <- input_reg %>%
 ##### ##### ##### ##### 
 
 
-dep.var <- c('growth_likes'
+dep.var <- c('growth_likes',
              'growth_shares',
              'growth_comments',
              'growth_reactions',
@@ -83,7 +83,7 @@ for (i in 1: length(dep.var)){
                                    '~',
                                    'as.factor(label_desinformacion)*as.factor(treatment)', 
                                    '|', 
-                                   'as.factor(days_since_factcheck) + id_post_desinformacion', 
+                                   'as.factor(days_since_factcheck) + as.factor(id_post_desinformacion)', 
                                    '+',
                                    'as.factor(days_since_publication)'))
   

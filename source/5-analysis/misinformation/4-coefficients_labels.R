@@ -65,7 +65,7 @@ subset5_input_reg <- input_reg %>%
 
 #### panel A: total interactions
 reg_label <- felm(formula = growth_interactions ~ as.factor(days_since_factcheck) * label_desinformacion | 
-                            as.factor(days_since_factcheck) + id_post_desinformacion + 
+                            as.factor(days_since_factcheck) + as.factor(id_post_desinformacion) + 
                             as.factor(days_since_publication), 
                           data = input_reg)
 
