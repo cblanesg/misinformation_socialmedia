@@ -7,10 +7,24 @@ library(ggplot2)
 setwd(dir = '~/misinformation_socialmedia/data/')
 
 ### Load and prepare data
-load('5-analysis/1-input_data/misinformation/data_reg_misinformation.Rda', verbose = TRUE)
+input_reg <- input_reg %>%
+  mutate(label_desinformacion  = as.factor(label_desinformacion), 
+         treatment = as.factor(treatment),
+         days_since_misinformation_relative_fc = as.factor(days_since_misinformation_relative_fc),
+         poynter = as.factor(poynter),
+         id_desinformacion = as.factor(id_desinformacion) #, 
+         #days_since_factcheck = as.factor(days_since_factcheck)
+  ) %>%
+  rename('label' = 'label_desinformacion', 
+         'dsm_relative_fc'  = 'days_since_misinformation_relative_fc') 
 
-popular_measure = read_excel('1-factchecks/2-clean_factchecks/factchecks_engagements.xlsx')  %>%
-  select(popular, id_factcheck, engagements_complete)
+input_reg %>%
+  dplyr::select(id_post_desinformacion, days_since_publication,days_since_factcheck, dsm_relative_fc) %>%
+  filter(days_since_factcheck == 0) %>%
+  filter(days_since_publication == dsm_relative_fc)
+
+length(unique(input_reg$id_post_desinformacion))
+
 
 unique_ids_poynter <- input_reg %>%
   select(id_post_desinformacion, poynter) %>%
@@ -338,6 +352,87 @@ ggplot(gg_data2, aes(x = days_since_factcheck, y = value, colour = interaction))
   ) +
   ggsave('6-descriptives/misinformation/growth_factcheck.png')
 
+
+######
+
+gg_data3 <- input_reg %>%
+  group_by(days_since_factcheck)  %>%
+  summarise(likes = mean(approx_likes, na.rm = TRUE), 
+            shares =mean(approx_shares, na.rm = TRUE),
+            reactions = mean(approx_reactions, na.rm = TRUE), 
+            comments =mean(approx_comments, na.rm = TRUE),
+            interactions =  mean(approx_interactions, na.rm = TRUE))  %>%
+  gather(likes:interactions, key = 'interaction', value = 'value')
+
+ggplot(gg_data3, aes(x = days_since_factcheck, y = value, colour = interaction)) + 
+  geom_point()  + 
+  geom_line() + 
+  geom_vline(xintercept  = 0, color = 'red', 
+             linetype = 'dotted')  +
+  labs(x = 'Days since Fact Check',
+       y = 'Growth') +
+  theme_bw() + 
+  theme(text = element_text(size=15),
+        #strip.background = element_rect(colour="white", fill="white"),
+        legend.position=c(.9,.75), 
+        legend.title =  element_blank()
+  )
+
+
+gg_data3 <- input_reg %>%
+  group_by(days_since_publication, label)  %>%
+  summarise(likes = mean(approx_likes, na.rm = TRUE), 
+            shares =mean(approx_shares, na.rm = TRUE),
+            reactions = mean(approx_reactions, na.rm = TRUE), 
+            comments =mean(approx_comments, na.rm = TRUE),
+            interactions =  mean(approx_interactions, na.rm = TRUE))  %>%
+  gather(likes:interactions, key = 'interaction', value = 'value')
+
+ggplot(gg_data3, aes(x = days_since_publication, y = value, colour = interaction)) + 
+  geom_point()  + 
+  geom_line() + 
+  xlim(0, 30)+
+  ylim(0, 1000) + 
+  facet_grid(.~label)+
+  geom_vline(xintercept  = 0, color = 'red', 
+             linetype = 'dotted')  +
+  labs(x = 'Days since Fact Check',
+       y = 'Growth') +
+  theme_bw() + 
+  theme(text = element_text(size=15),
+        #strip.background = element_rect(colour="white", fill="white"),
+        legend.position=c(.9,.75), 
+        legend.title =  element_blank()
+  ) + 
+  ggsave('6-descriptives/misinformation/levels_factcheck_label.png')
+
+input_reg$dsm_relative_fc
+gg_data3 <- input_reg %>%
+  group_by(days_since_publication, label, dsm_relative_fc)  %>%
+  summarise(likes = mean(approx_likes, na.rm = TRUE), 
+            shares =mean(approx_shares, na.rm = TRUE),
+            reactions = mean(approx_reactions, na.rm = TRUE), 
+            comments =mean(approx_comments, na.rm = TRUE),
+            interactions =  mean(approx_interactions, na.rm = TRUE))  %>%
+  gather(likes:interactions, key = 'interaction', value = 'value')
+
+ggplot(gg_data3, aes(x = days_since_publication, y = value, colour = interaction)) + 
+  geom_point()  + 
+  geom_line() + 
+  xlim(0, 30)+
+  ylim(0, 1000) + 
+  facet_grid(.~label)+
+  facet_wrap(.~dsm_relative_fc) + 
+  geom_vline(xintercept  = 0, color = 'red', 
+             linetype = 'dotted')  +
+  labs(x = 'Days since Fact Check',
+       y = 'Growth') +
+  theme_bw() + 
+  theme(text = element_text(size=15),
+        #strip.background = element_rect(colour="white", fill="white"),
+        legend.position=c(.9,.75), 
+        legend.title =  element_blank()
+  )
 
 ################
 ### Subset 10 days 
