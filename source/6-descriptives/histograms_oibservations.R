@@ -113,8 +113,7 @@ count_observations_growth = input_reg %>%
   filter(!is.na(growth_likes)) %>%
   group_by(days_since_factcheck) %>%
   count() %>%
-  mutate(days_since_factcheck = as.factor(days_since_factcheck)) + 
-  labs(y = 'number of observations')
+  mutate(days_since_factcheck = as.factor(days_since_factcheck)) 
   
 
 ggplot(data = count_observations_growth, aes(x = days_since_factcheck, y = n)) + 
@@ -122,4 +121,7 @@ ggplot(data = count_observations_growth, aes(x = days_since_factcheck, y = n)) +
   theme_bw()  + 
   ggsave('6-descriptives/misinformation/observations_growth.png')
 
+
+
+#####3
 

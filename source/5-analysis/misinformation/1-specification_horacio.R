@@ -48,7 +48,7 @@ dep.var <- c('approx_likes' ,
 reg_fe_label2 <- list()
 for (i in 1: length(dep.var)){
   
-  formula_reg <- as.formula(paste0(dep.var[i], ## dep variable
+  formula_reg <- as.formula(paste0(dep.var[1], ## dep variable
                                    '~',
                                    'treatment*label',  ##  beta * post_t * X_i
                                    '+',
@@ -58,11 +58,11 @@ for (i in 1: length(dep.var)){
                                    '|',
                                    'id_desinformacion', ## mu_i: misinformation fe
                                    '+',
-                                   'days_since_factcheck'  ## omega_t: days since fc fe
+                                   'date_timestep'  ## omega_t: days since fc fe
   ))
   
   
-  reg_fe_label2[[i]] <- felm(formula = formula_reg, 
+  reg_fe_label2[[1]] <- felm(formula = formula_reg, 
                              data = input_reg, 
                              clustervar = 'id_desinformacion')
   
@@ -71,6 +71,10 @@ for (i in 1: length(dep.var)){
   print(paste0('Finish: ', i))
 }
 #####
+
+input_reg$date_timestep
+
+stargazer::stargazer(reg_fe_label2[[1]], type = 'text')
 
 table_fe_label1 <- stargazer::stargazer(reg_fe_label2[1], 
                                        reg_fe_label2[2],

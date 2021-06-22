@@ -25,7 +25,8 @@ setwd(dir = '~/misinformation_socialmedia/data/')
 
 ### Load and prepare data
 load('5-analysis/1-input_data/misinformation/data_reg_misinformation.Rda', verbose = TRUE)
-
+colnames(input_reg)
+input_reg$
 ## Run regressions
 
 ##### ##### ##### ##### 
